@@ -48,10 +48,17 @@ class App extends PureComponent {
     }
   }
 
+  search(query) {
+
+  }
+
   handleSubmit(e) {
     e.persist();
     e.preventDefault()
+    this.transition({type: 'SEARCH', query: this.state.query});
   }
+
+
 
   render() {
     return (
