@@ -1,7 +1,12 @@
 import React, { PureComponent } from 'react';
 import galleryMachine from './sm/transitions';
-import fetchJson from 'fetch-jsonp';
-import Api from './api/api';
+import fetchJsonp from 'fetch-jsonp';
+// import Api from './api/api';
+import RenderForm from './styled/form';
+import RenderGallery from './styled/gallery';
+import RenderPhoto from './styled/photo';
+
+// console.log(galleryMachine)
 
 class App extends PureComponent {
   constructor(props) {
@@ -12,11 +17,22 @@ class App extends PureComponent {
       query: '',
       items: []
     }
+
+    this.transition = this.transition.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleChangeQuery = this.handleChangeQuery.bind(this)
+    this.transition = this.transition.bind(this)
   }
 
   transition(action) {
     const currentGalleryState = this.state.gallery;
+    console.log(`action: ${action.type}`)
+    console.log(`current state: ${currentGalleryState}`)
+    // console.log(galleryMachine['loading']['SEARCH_SUCCESS'])
+    console.log('machine :' + galleryMachine)
     const nextGalleryState = galleryMachine[currentGalleryState][action.type];
+
+    console.log(`next state: ${nextGalleryState}`)
 
     if (nextGalleryState) {
       const nextState = this.command(nextGalleryState, action)
@@ -29,6 +45,8 @@ class App extends PureComponent {
   }
 
   command(nextState, action) {
+    console.log(`command-nexState: ${nextState}`)
+    console.log(`command-action: ${action}`)
     switch(nextState) {
       case 'loading':
         this.search(action.query)
@@ -48,22 +66,42 @@ class App extends PureComponent {
     }
   }
 
-  search(query) {
-
-  }
-
   handleSubmit(e) {
     e.persist();
     e.preventDefault()
+    console.log(this.state.query)
     this.transition({type: 'SEARCH', query: this.state.query});
   }
 
+  search(query) {
+    console.log(query)
+    const encodeQuery = encodeURIComponent(query);
+    console.log(query)
+    setTimeout(() => {
+      fetchJsonp(`https://api.flickr.com/services/feeds/photos_public.gne?lang=en-us&format=json&tags=${encodeQuery}`,
+        {jsonpCallback: 'jsoncallback'})
+        .then(res => res.json())
+        .then((data) => { console.log(data.items); this.transition({type: 'SEARCH_SUCCSESS', items: data.items})})
+        .catch((data) => { this.transition({type: 'SEARCH_FAULURE'})});
+    }, 1000);
+  }
 
+  handleChangeQuery(value) {
+    this.setState({query: value})
+  }
 
   render() {
+    const galleryState = this.state;
+    console.log(this.state)
     return (
       <div className="App">
-        <h1>State machine</h1>
+        <RenderForm
+          handleSubmit={this.handleSubmit}
+          handleChangeQuery={this.handleChangeQuery}
+          transition={this.transition}
+          state={this.state} />
+        <RenderGallery transition={this.transition} state={galleryState} />
+      <RenderPhoto transition={this.transition} state={galleryState}  />
       </div>
     );
   }

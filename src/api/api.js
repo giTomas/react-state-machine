@@ -1,85 +1,62 @@
 // https://css-tricks.com/importance-javascript-abstractions-working-remote-data/
 // https://css-tricks.com/adapting-javascript-abstractions-time/
 // https://developer.mozilla.org/en-US/docs/Web/API/Response/status
+// error handling
+// https://dzone.com/articles/easier-error-handling-using-asyncawait
 
 class API {
-  constructor(url='') {
-    this.url = url
+  constructor(url, mime='application/json') {
+    this._URL = url
+    this._MIME = mime
   }
 
-  _handleError(_res) {
-
-  }
-
-  _handleContentType(_response) {
-
-  }
-
-  get(_endpoint) {
+  get(_endpoint, _mime=this._MIME) {
     return async () => {
       try {
-        const resp = await fetch(this.url+_endpoint, {
+        const resp = await fetch(this._URL+_endpoint, {
           method: 'GET',
           headers: new Headers({
-            'Accept': 'application/json'
+            'Accept': _mime
           })
         })
-
-        // handle error
         if (!resp.ok) {
-          // throw Error(resp.statusText)
-          return {status: 'Error', statusCode: resp.status, statusText: resp.statusText}
+          return { ok: false, error: `${resp.status}: ${resp.statusText}`}
         }
-
-        // handle content type
         const contentType = resp.headers.get('content-type');
-        if (contentType.includes('application/json')) {
-          return {status: 'Error', statusText: 'Not json!'}
+        if (contentType.includes(_mime)) {
+          return {ok : false, error: `Not ${_mime} MIME type` }
         }
-
         const data = await resp.json()
-
-        return data
-
+        return {ok: true, data}
       }
       catch (error) {
-        return error.message
+         return {ok: false, error}
       }
-
     }
   }
 
-  post(_endpoint, _body) {
+  post(_endpoint, _body, _mime=this._MIME) {
     return async () => {
       try {
-        const resp = await fetch(this.url+_endpoint, {
+        const resp = await fetch(this._URL+_endpoint, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': _mime},
           body: _body
         })
-
-
-        // handle error
         if (!resp.ok) {
-          // throw Error(resp.statusText)
-          return {status: 'Error', statusCode: resp.status, statusText: resp.statusText}
+          return { ok: false, error: `${resp.status}: ${resp.statusText}`}
         }
-
-        // handle content type
         const contentType = resp.headers.get('content-type');
-
-        if (contentType.includes('application/json')) {
-          return {status: 'Error', statusText: 'Not json!'}
+        if (contentType.includes(_mime)) {
+          return {ok : false, error: `Not ${_mime} MIME type` }
         }
-
-        // validUrl
-
         const location = resp.url
-
-        return location
-
-      } catch (error) {
-        return error.message
-      }
+        return {ok: true,  location}
+        }
+        catch (error) {
+           return {ok: false, error}
+        }
     }
 }}
+
+export default API;
