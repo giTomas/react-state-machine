@@ -28,7 +28,7 @@ class App extends PureComponent {
     const currentGalleryState = this.state.gallery;
     console.log(`action: ${action.type}`)
     console.log(`current state: ${currentGalleryState}`)
-    // console.log(galleryMachine['loading']['SEARCH_SUCCESS'])
+    console.log(galleryMachine['loading']['SEARCH_SUCCESS'])
     console.log('machine :' + galleryMachine)
     const nextGalleryState = galleryMachine[currentGalleryState][action.type];
 
@@ -46,7 +46,7 @@ class App extends PureComponent {
 
   command(nextState, action) {
     console.log(`command-nexState: ${nextState}`)
-    console.log(`command-action: ${action}`)
+    console.log(action)
     switch(nextState) {
       case 'loading':
         this.search(action.query)
@@ -74,14 +74,14 @@ class App extends PureComponent {
   }
 
   search(query) {
-    console.log(query)
     const encodeQuery = encodeURIComponent(query);
-    console.log(query)
     setTimeout(() => {
       fetchJsonp(`https://api.flickr.com/services/feeds/photos_public.gne?lang=en-us&format=json&tags=${encodeQuery}`,
         {jsonpCallback: 'jsoncallback'})
         .then(res => res.json())
-        .then((data) => { console.log(data.items); this.transition({type: 'SEARCH_SUCCSESS', items: data.items})})
+        .then((data) => {
+          // console.log(data.items);
+          this.transition({type: 'SEARCH_SUCCESS', items: data.items})})
         .catch((data) => { this.transition({type: 'SEARCH_FAULURE'})});
     }, 1000);
   }
@@ -92,7 +92,7 @@ class App extends PureComponent {
 
   render() {
     const galleryState = this.state;
-    console.log(this.state)
+    // console.log(this.state)
     return (
       <div className="App">
         <RenderForm

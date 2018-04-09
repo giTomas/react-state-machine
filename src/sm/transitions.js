@@ -7,6 +7,9 @@ const galleryMachine = {
     SEARCH_FAILURE: 'error',
     CANCEL_SEARCH: 'gallery',
   },
+  error: {
+    SEARCH: 'loading'
+  },
   gallery: {
     SEARCH: 'loading',
     SELECT_PHOTO: 'photo'

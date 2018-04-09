@@ -14,7 +14,6 @@ const Image = styled.img`
 `;
 
 const RenderGallery = ({state, transition}) => {
-  console.log(state.items)
   return (
   <UiItems state={state}>
     {state.gallery === 'error'
