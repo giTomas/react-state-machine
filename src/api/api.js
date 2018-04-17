@@ -50,6 +50,7 @@ class API {
         if (contentType.includes(_mime)) {
           return {ok : false, error: `Not ${_mime} MIME type` }
         }
+        // location? really url?
         const location = resp.url
         return {ok: true,  location}
         }
